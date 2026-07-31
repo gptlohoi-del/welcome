@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilingual Temple Guide (Auto-load DOCX)</title>
+    <title>Bilingual Temple Guide (Mobile Optimized)</title>
     <!-- Tải thư viện Mammoth.js để đọc file Word (.docx) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
     <style>
@@ -11,7 +11,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             background: #f4f6f8;
             color: #333;
         }
@@ -19,7 +19,7 @@
             max-width: 1200px;
             margin: 0 auto;
             background: #fff;
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
@@ -30,6 +30,8 @@
             padding-bottom: 10px;
             text-align: center;
         }
+        
+        /* Cấu trúc chia cột mặc định cho màn hình máy tính */
         .split-row {
             display: flex;
             border-bottom: 1px dashed #eaeaea;
@@ -40,48 +42,97 @@
             border-bottom: none;
         }
         .col { flex: 1; min-width: 0; }
-        .en-col p { color: #2c3e50; font-size: 1.05em; margin: 0 0 10px 0; }
+        .en-col p { color: #2c3e50; font-size: 1.1em; margin: 0 0 10px 0; }
         .vi-col p { color: #555; font-style: italic; margin: 0 0 10px 0; }
         
+        /* Thanh công cụ đã bỏ thuộc tính sticky */
         .top-bar {
-            position: sticky; top: 10px; background: #1a4a38; color: white;
-            padding: 15px 25px; border-radius: 8px; display: flex; align-items: center;
-            gap: 15px; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 30px;
+            background: #1a4a38; color: white;
+            padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; flex-wrap: wrap;
+            gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 25px;
         }
-        .top-bar input { width: 60px; padding: 5px 10px; font-size: 16px; border-radius: 4px; border: none; outline: none;}
+        .top-bar input { width: 50px; padding: 5px 10px; font-size: 16px; border-radius: 4px; border: none; outline: none; text-align: center;}
         
         .toast {
             position: fixed; bottom: 30px; right: 30px; background: #f2f3f5; color: #333;
-            padding: 20px 25px; border-radius: 8px; opacity: 0; transition: opacity 0.3s, transform 0.3s;
-            pointer-events: none; z-index: 1000; font-size: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            min-width: 250px; transform: translateY(20px);
+            padding: 15px 20px; border-radius: 8px; opacity: 0; transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none; z-index: 1000; font-size: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            min-width: 250px; transform: translateY(20px); border-left: 5px solid #d35400;
         }
         .toast.show { opacity: 1; transform: translateY(0); }
-        .dict-title { font-size: 1.5em; font-weight: bold; color: #d35400; margin-bottom: 2px; text-transform: capitalize; }
-        .dict-phonetic { color: #7f8c8d; font-size: 1.2em; margin-bottom: 15px; }
-        .dict-meaning { font-size: 1.1em; color: #2c3e50; }
-        .dict-status { margin-top: 15px; font-size: 0.95em; color: #95a5a6; font-style: italic; }
+        .dict-title { font-size: 1.4em; font-weight: bold; color: #d35400; margin-bottom: 2px; text-transform: capitalize; }
+        .dict-phonetic { color: #7f8c8d; font-size: 1.1em; margin-bottom: 10px; font-family: monospace;}
+        .dict-meaning { font-size: 1.05em; color: #2c3e50; }
+        .dict-status { margin-top: 10px; font-size: 0.9em; color: #95a5a6; font-style: italic; }
         
-        .clickable-word { cursor: pointer; color: #2980b9; transition: all 0.2s; display: inline-block; }
-        .clickable-word:hover { background: #e1f0fa; border-radius: 3px; }
+        .clickable-word { cursor: pointer; color: #2980b9; transition: all 0.2s; display: inline-block; border-bottom: 1px dotted #2980b9; }
+        .clickable-word:hover { background: #e1f0fa; border-radius: 3px; border-bottom: none;}
         .grid-header { display: flex; background: #e1f0fa; padding: 10px 0; border-radius: 6px; margin-bottom: 15px; font-weight: bold; color: #2c3e50; }
         .grid-header .col { padding: 0 20px; }
         
-        .footer { margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #eaeaea; background-color: #fff; border-radius: 8px; }
-        .footer a { color: #2980b9; text-decoration: none; font-size: 1.1em; font-weight: 500; }
-        .copy-btn { margin-left: 15px; padding: 8px 16px; background-color: #1a4a38; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .footer { margin-top: 40px; padding: 20px; text-align: center; border-top: 1px solid #eaeaea; background-color: #fff; border-radius: 8px; }
+        .footer a { color: #2980b9; text-decoration: none; font-size: 1em; font-weight: 500; word-break: break-all;}
+        .copy-btn { margin-top: 10px; padding: 8px 16px; background-color: #1a4a38; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
-        #loading { text-align: center; font-size: 1.2em; color: #1a4a38; padding: 50px; font-weight: bold; }
+        #loading { text-align: center; font-size: 1.1em; color: #1a4a38; padding: 40px 10px; font-weight: bold; }
+
+        /* TỐI ƯU HÓA CHO ĐIỆN THOẠI (Mobile Responsive) */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 15px; }
+            
+            /* Chuyển cột ngang thành dọc xếp chồng lên nhau */
+            .split-row {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px 0;
+            }
+            .grid-header {
+                display: none; /* Ẩn thanh tiêu đề cột trên điện thoại */
+            }
+            .vi-col {
+                border-left: 3px solid #1a4a38;
+                padding-left: 12px;
+                background-color: #fafafa;
+                padding-top: 8px;
+                padding-bottom: 8px;
+                border-radius: 0 4px 4px 0;
+            }
+            .vi-col p { margin-bottom: 5px; }
+            
+            /* Tùy chỉnh thanh top-bar cho màn hình nhỏ */
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                font-size: 0.95em;
+            }
+            .top-bar span {
+                font-size: 0.85em;
+                opacity: 0.9;
+            }
+            
+            /* Tùy chỉnh khung popup từ điển */
+            .toast {
+                right: 15px;
+                left: 15px;
+                bottom: 20px;
+                min-width: auto;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Thanh công cụ giờ đây sẽ trôi theo trang web -->
         <div class="top-bar">
-            <label for="repeat-n">Số lần đọc (n): </label>
-            <input type="number" id="repeat-n" value="3" min="1" max="20">
-            <span>Click vào bất kỳ từ tiếng Anh nào bên trái để tra từ điển & nghe phát âm!</span>
+            <div>
+                <label for="repeat-n">Số lần đọc: </label>
+                <input type="number" id="repeat-n" value="3" min="1" max="20">
+            </div>
+            <span>Hướng dẫn: Chạm vào từ tiếng Anh để tra từ điển & nghe phát âm!</span>
         </div>
         
+        <!-- Tiêu đề cột sẽ tự động ẩn trên màn hình điện thoại -->
         <div class="grid-header">
             <div class="col">English (Tiếng Anh)</div>
             <div class="col">Vietnamese (Tiếng Việt)</div>
@@ -91,7 +142,7 @@
         <div id="content"></div>
         
         <div class="footer">
-            <a href="https://gptlohoi-del.github.io/welcome/" target="_blank" id="footer-link">https://gptlohoi-del.github.io/welcome/</a>
+            <div><a href="https://gptlohoi-del.github.io/welcome/" target="_blank" id="footer-link">https://gptlohoi-del.github.io/welcome/</a></div>
             <button class="copy-btn" onclick="copyFooterLink()">Copy link</button>
         </div>
     </div>
@@ -100,7 +151,7 @@
 
     <script>
         // ==========================================
-        // 1. CẤU HÌNH ĐƯỜNG LINK GITHUB RAW
+        // 1. ĐƯỜNG LINK GITHUB RAW CỦA FILE DOCX
         // ==========================================
         const DOCX_URL = "https://raw.githubusercontent.com/gptlohoi-del/welcome/main/file%20in%20%20S%E1%BB%95%20A5%20l%C3%B2%20xo%20edtited%2004.05.2024.docx"; 
 
@@ -199,7 +250,6 @@
             });
         }
 
-        // Biến toàn cục để theo dõi ID luồng phát âm và Audio object hiện tại
         let currentPlayId = 0;
         let currentAudio = null;
 
@@ -258,22 +308,18 @@
             }
 
             async function playAudio(word, n) {
-                // Tăng ID để định danh đây là luồng phát mới nhất
                 currentPlayId++;
                 let myPlayId = currentPlayId;
 
-                // Tắt ngay Audio object cũ nếu đang chạy
                 if (currentAudio) {
                     currentAudio.pause();
                     currentAudio.currentTime = 0;
                 }
-                // Hủy ngay bộ đọc mặc định của trình duyệt nếu đang chạy
                 window.speechSynthesis.cancel();
 
                 const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(word)}`;
                 
                 for (let i = 0; i < n; i++) {
-                    // Nếu ID không khớp (tức là đã có click mới), dừng vòng lặp này lại lập tức
                     if (myPlayId !== currentPlayId) break;
 
                     try {
@@ -329,11 +375,8 @@
             });
         }
 
-        if (DOCX_URL.includes("DÁN_LINK_RAW")) {
-            document.getElementById('loading').innerHTML = `<span style="color:red">Vui lòng mở mã HTML và thay thế biến <b>DOCX_URL</b> bằng link RAW file Word của bạn trên GitHub.</span>`;
-        } else {
-            loadDocxFromGithub();
-        }
+        // Tải dữ liệu ngay khi mở trang
+        loadDocxFromGithub();
     </script>
 </body>
 </html>
