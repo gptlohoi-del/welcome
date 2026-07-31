@@ -100,11 +100,9 @@
 
     <script>
         // ==========================================
-        // 1. CẤU HÌNH ĐƯỜNG LINK GITHUB CỦA BẠN TẠI ĐÂY
+        // 1. CẤU HÌNH ĐƯỜNG LINK GITHUB RAW
         // ==========================================
         const DOCX_URL = "https://raw.githubusercontent.com/gptlohoi-del/welcome/main/file%20in%20%20S%E1%BB%95%20A5%20l%C3%B2%20xo%20edtited%2004.05.2024.docx"; 
-        // Ví dụ: "https://raw.githubusercontent.com/user/repo/main/So_A5.docx"
-
 
         // ==========================================
         // TẢI VÀ XỬ LÝ DỮ LIỆU TỪ FILE DOCX
@@ -115,12 +113,9 @@
                 if (!response.ok) throw new Error("Không thể tải file DOCX. Hãy kiểm tra lại link RAW.");
                 
                 const arrayBuffer = await response.arrayBuffer();
-                
-                // Dùng Mammoth trích xuất chữ từ Word
                 const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
                 const rawText = result.value;
                 
-                // Phân tích văn bản và tạo HTML
                 renderContent(rawText);
             } catch (error) {
                 document.getElementById('loading').innerHTML = `<span style="color:red">Lỗi: ${error.message}<br>Đảm bảo link bạn dán là link RAW của GitHub và Repository đang ở chế độ Public.</span>`;
@@ -142,7 +137,6 @@
                 if (!line || line === '|') continue;
                 if (line.startsWith('| ')) line = line.substring(2);
 
-                // Xử lý dòng chứa thanh dọc " | "
                 if (line.includes(' | ')) {
                     if (currentEn.length || currentVi.length) {
                         rows.push({en: currentEn, vi: currentVi});
@@ -190,12 +184,11 @@
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').innerHTML = html;
             
-            // Kích hoạt tính năng click tra từ sau khi load xong HTML
             setupInteractiveDictionary();
         }
 
         // ==========================================
-        // CÁC CHỨC NĂNG TƯƠNG TÁC (TỪ ĐIỂN, AUDIO, COPY)
+        // CÁC CHỨC NĂNG TƯƠNG TÁC
         // ==========================================
         function copyFooterLink() {
             navigator.clipboard.writeText("https://gptlohoi-del.github.io/welcome/").then(() => {
@@ -205,6 +198,10 @@
                 setTimeout(() => { btn.textContent = "Copy link"; btn.style.backgroundColor = "#1a4a38"; }, 2000);
             });
         }
+
+        // Biến toàn cục để theo dõi ID luồng phát âm và Audio object hiện tại
+        let currentPlayId = 0;
+        let currentAudio = null;
 
         function setupInteractiveDictionary() {
             const enCols = document.querySelectorAll('.en-col');
@@ -261,18 +258,40 @@
             }
 
             async function playAudio(word, n) {
+                // Tăng ID để định danh đây là luồng phát mới nhất
+                currentPlayId++;
+                let myPlayId = currentPlayId;
+
+                // Tắt ngay Audio object cũ nếu đang chạy
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+                // Hủy ngay bộ đọc mặc định của trình duyệt nếu đang chạy
+                window.speechSynthesis.cancel();
+
                 const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(word)}`;
+                
                 for (let i = 0; i < n; i++) {
+                    // Nếu ID không khớp (tức là đã có click mới), dừng vòng lặp này lại lập tức
+                    if (myPlayId !== currentPlayId) break;
+
                     try {
-                        const audio = new Audio(audioUrl);
+                        currentAudio = new Audio(audioUrl);
                         await new Promise((resolve, reject) => {
-                            audio.onended = resolve; audio.onerror = reject; audio.play().catch(reject);
+                            currentAudio.onended = resolve; 
+                            currentAudio.onerror = reject; 
+                            currentAudio.play().catch(reject);
                         });
                     } catch (e) {
+                        if (myPlayId !== currentPlayId) break;
                         let utterance = new SpeechSynthesisUtterance(word);
-                        utterance.lang = 'en-US'; window.speechSynthesis.speak(utterance);
+                        utterance.lang = 'en-US'; 
+                        window.speechSynthesis.speak(utterance);
                         await new Promise(r => { utterance.onend = r; utterance.onerror = r; });
                     }
+                    
+                    if (myPlayId !== currentPlayId) break;
                     await new Promise(r => setTimeout(r, 600));
                 }
             }
@@ -310,7 +329,6 @@
             });
         }
 
-        // Kích hoạt việc tải file ngay khi mở trang web
         if (DOCX_URL.includes("DÁN_LINK_RAW")) {
             document.getElementById('loading').innerHTML = `<span style="color:red">Vui lòng mở mã HTML và thay thế biến <b>DOCX_URL</b> bằng link RAW file Word của bạn trên GitHub.</span>`;
         } else {
